@@ -258,8 +258,11 @@ a.whatsapp-btn {
     ⚠️ We are not responsible for transactions. All deals and payments happen directly between seller & buyer via WhatsApp. No commissions are taken.
 </div>
 
-<h2>Available Books</h2>
-<div class="book-list" id="bookList"></div>
+<div style="text-align:center; margin-bottom: 16px;">
+    <a class="whatsapp-btn" href="books.html">View Available Books</a>
+</div>
+
+<!-- Moved to books.html -->
 
 <!-- MODAL -->
 <div class="modal" id="authModal">
@@ -290,7 +293,7 @@ a.whatsapp-btn {
     const supabase = createClient("https://wzheisuwjdnjklpmzqtd.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aGVpc3V3amRuamtscG16cXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4MzQ1NTQsImV4cCI6MjA3MDQxMDU1NH0.uU04yFLt6EuPBagwc-qVDBZIiigk9HIDBJoIkEQ7oG0");
 
     const bookForm = document.getElementById('bookForm');
-    const bookList = document.getElementById('bookList');
+    // book list moved to books.html
 
     // Modal handling
     const authModal = document.getElementById('authModal');
@@ -336,31 +339,12 @@ a.whatsapp-btn {
         else {
             alert('Login successful');
             authModal.style.display = 'none';
-            bookForm.style.display = 'block';
+            window.location.href = 'dashboard.html';
         }
     };
 
     // Books loading
-    async function loadBooks() {
-        const { data, error } = await supabase
-            .from('books')
-            .select('*')
-            .order('id', { ascending: false });
-        if (error) return console.error(error);
-        bookList.innerHTML = "";
-        data.forEach(book => {
-            const bookItem = document.createElement('div');
-            bookItem.className = 'book';
-            bookItem.innerHTML = `
-                <img src="${book.image_url}" alt="${book.title}">
-                <h3>${book.title}</h3>
-                <p><strong>₹${book.price}</strong></p>
-                <p>${book.description}</p>
-                <a class="whatsapp-btn" href="https://wa.me/${book.whatsapp}" target="_blank">Chat on WhatsApp</a>
-            `;
-            bookList.appendChild(bookItem);
-        });
-    }
+    // books listing moved to books.html
 
     // Upload image
     async function uploadImage(file) {
@@ -393,11 +377,11 @@ a.whatsapp-btn {
         if (error) alert('Error adding book: ' + error.message);
         else {
             bookForm.reset();
-            loadBooks();
+            // loadBooks moved to books.html
         }
     });
 
-    loadBooks();
+    // loadBooks moved to books.html
 </script>
 </body>
 </html>

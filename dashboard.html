@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Bazar - Dashboard</title>
+<style>
+:root {
+    --bg-gradient: radial-gradient(circle at center, #1d2b64, #9b2063, #000000);
+    --text-color: #fff;
+    --form-bg: rgba(40, 40, 40, 0.9);
+    --input-bg: rgba(18, 18, 18, 0.9);
+    --button-bg: #9b2063;
+    --button-hover: #1d2b64;
+    --book-bg: rgba(40, 40, 40, 0.9);
+    --disclaimer-bg: rgba(255, 77, 77, 0.9);
+}
+
+.light-mode {
+    --bg-gradient: radial-gradient(circle at center, #f5f5f5, #dcdcdc, #ffffff);
+    --text-color: #000;
+    --form-bg: rgba(255, 255, 255, 0.9);
+    --input-bg: rgba(240, 240, 240, 0.9);
+    --button-bg: #1d2b64;
+    --button-hover: #9b2063;
+    --book-bg: rgba(255, 255, 255, 0.9);
+    --disclaimer-bg: rgba(255, 200, 200, 0.9);
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background: var(--bg-gradient);
+    background-size: cover;
+    background-attachment: fixed;
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+h1 { text-align: center; color: var(--text-color); }
+form {
+    background: var(--form-bg);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+input, textarea, button {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+}
+input, textarea { background: var(--input-bg); color: var(--text-color); }
+button { background: var(--button-bg); color: white; cursor: pointer; font-weight: bold; }
+button:hover { background: var(--button-hover); }
+
+a.nav-btn {
+    display: inline-block;
+    margin-top: 10px;
+    background: var(--button-bg);
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+</style>
+</head>
+<body>
+
+<h1>📚 Book Bazar - Dashboard</h1>
+<div style="text-align:center; margin-bottom: 16px;">
+    <a class="nav-btn" href="books.html">View Available Books</a>
+    <a class="nav-btn" href="index.html" style="margin-left:8px;" id="logoutBtn">Logout</a>
+</div>
+
+<form id="bookForm">
+    <input type="text" id="title" placeholder="Book Title" required>
+    <input type="number" id="price" placeholder="Price" required>
+    <input type="tel" id="whatsapp" placeholder="WhatsApp Number (with country code)" required>
+    <input type="file" id="image" accept="image/*" required>
+    <textarea id="description" placeholder="Description" required></textarea>
+    <button type="submit">Add Book</button>
+</form>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const supabase = createClient(
+  "https://wzheisuwjdnjklpmzqtd.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aGVpc3V3amRuamtscG16cXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4MzQ1NTQsImV4cCI6MjA3MDQxMDU1NH0.uU04yFLt6EuPBagwc-qVDBZIiigk9HIDBJoIkEQ7oG0"
+);
+
+// Redirect to login if not authenticated
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    window.location.href = 'index.html';
+  }
+})();
+
+// Upload image to storage and return public URL
+async function uploadImage(file) {
+  const fileName = `${Date.now()}-${file.name}`;
+  const { error } = await supabase.storage.from('book-images').upload(fileName, file);
+  if (error) return null;
+  const { data: publicData } = supabase.storage.from('book-images').getPublicUrl(fileName);
+  return publicData.publicUrl;
+}
+
+const bookForm = document.getElementById('bookForm');
+bookForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const file = document.getElementById('image').files[0];
+  const imageUrl = await uploadImage(file);
+  if (!imageUrl) return alert('Image upload failed');
+
+  const newBook = {
+    title: document.getElementById('title').value,
+    price: parseFloat(document.getElementById('price').value),
+    whatsapp: document.getElementById('whatsapp').value,
+    image_url: imageUrl,
+    description: document.getElementById('description').value
+  };
+
+  const { error } = await supabase.from('books').insert([newBook]);
+  if (error) alert('Error adding book: ' + error.message);
+  else {
+    bookForm.reset();
+    alert('Book added! Go to Available Books to view it.');
+  }
+});
+
+// Logout
+const logoutBtn = document.getElementById('logoutBtn');
+logoutBtn.addEventListener('click', async (e) => {
+  e.preventDefault();
+  await supabase.auth.signOut();
+  window.location.href = 'index.html';
+});
+</script>
+</body>
+</html>
