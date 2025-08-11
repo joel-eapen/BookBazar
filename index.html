@@ -466,11 +466,18 @@ a.whatsapp-btn:hover { background: var(--button-hover); }
         const email = document.getElementById('loginEmail').value.trim();
         const password = document.getElementById('loginPassword').value;
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if(error) alert(error.message);
-        else {
+        if (error) {
+            alert(error.message);
+        } else {
             alert('Login successful');
-            authModal.style.display = 'none';
-            window.location.href = 'dashboard.html';
+            if (sellIntent) {
+                authModal.style.display = 'none';
+                revealSellForm();
+                sellIntent = false;
+            } else {
+                authModal.style.display = 'none';
+                window.location.href = 'dashboard.html';
+            }
         }
     };
 
@@ -488,9 +495,16 @@ a.whatsapp-btn:hover { background: var(--button-hover); }
         return publicData.publicUrl;
     }
 
-    // Add book
+    // Add book (requires auth)
     bookForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            alert('Please login to sell a book');
+            authModal.style.display = 'flex';
+            sellIntent = true;
+            return;
+        }
         const file = document.getElementById('image').files[0];
         const imageUrl = await uploadImage(file);
         if (!imageUrl) return alert("Image upload failed");
@@ -521,17 +535,28 @@ a.whatsapp-btn:hover { background: var(--button-hover); }
         localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
     });
 
-    // Sell CTA reveals the form
+    // Sell CTA reveals the form (gated behind auth)
     const sellCta = document.getElementById('sellCta');
     const openSellFromHint = document.getElementById('openSellFromHint');
+    let sellIntent = false;
     function revealSellForm() {
         document.getElementById('sell').scrollIntoView({ behavior: 'smooth', block: 'start' });
         bookForm.style.display = 'block';
         const sellHint = document.getElementById('sellHint');
         if (sellHint) sellHint.style.display = 'none';
     }
-    sellCta.addEventListener('click', (e) => { e.preventDefault(); revealSellForm(); });
-    openSellFromHint.addEventListener('click', revealSellForm);
+    async function handleSellClick(e) {
+        e.preventDefault();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            sellIntent = true;
+            authModal.style.display = 'flex';
+            return;
+        }
+        revealSellForm();
+    }
+    sellCta.addEventListener('click', handleSellClick);
+    openSellFromHint.addEventListener('click', handleSellClick);
 
     // Footer year
     document.getElementById('year').textContent = new Date().getFullYear();
