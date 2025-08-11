@@ -101,50 +101,62 @@ a.whatsapp-btn {
     position: absolute;
     top: 20px;
     right: 20px;
-    display: flex;
+}
+
+/* LOGIN MODAL */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(6px);
+    justify-content: center;
     align-items: center;
 }
-.theme-toggle input {
-    width: 40px;
-    height: 20px;
-    appearance: none;
-    background: #ccc;
-    border-radius: 20px;
-    position: relative;
+.modal-content {
+    background: rgba(30,30,30,0.85);
+    padding: 20px;
+    border-radius: 12px;
+    width: 320px;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+.modal-tabs {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 15px;
+}
+.modal-tabs button {
+    background: none;
+    border: none;
+    padding: 8px;
+    color: #bbb;
+    font-weight: bold;
     cursor: pointer;
-    outline: none;
-    transition: background 0.3s;
 }
-.theme-toggle input:checked {
-    background: #4caf50;
+.modal-tabs button.active {
+    color: white;
+    border-bottom: 2px solid var(--button-bg);
 }
-.theme-toggle input::before {
-    content: '';
-    width: 18px;
-    height: 18px;
-    background: white;
-    border-radius: 50%;
+.close-btn {
     position: absolute;
-    top: 1px;
-    left: 1px;
-    transition: transform 0.3s;
-}
-.theme-toggle input:checked::before {
-    transform: translateX(20px);
+    top: 20px;
+    right: 25px;
+    font-size: 22px;
+    color: white;
+    cursor: pointer;
 }
 </style>
 </head>
 <body>
 
-<div class="theme-toggle">
-    <label>
-        <input type="checkbox" id="themeSwitch">
-    </label>
-</div>
 
 <h1>📚 Book Bazar</h1>
 
-<form id="bookForm">
+<button id="openLogin">Login / Sign Up</button>
+
+<form id="bookForm" style="display:none;">
     <input type="text" id="title" placeholder="Book Title" required>
     <input type="number" id="price" placeholder="Price" required>
     <input type="tel" id="whatsapp" placeholder="WhatsApp Number (with country code)" required>
@@ -160,42 +172,92 @@ a.whatsapp-btn {
 <h2>Available Books</h2>
 <div class="book-list" id="bookList"></div>
 
+<!-- MODAL -->
+<div class="modal" id="authModal">
+    <div class="modal-content">
+        <span class="close-btn" id="closeModal">&times;</span>
+        <div class="modal-tabs">
+            <button id="loginTab" class="active">Login</button>
+            <button id="signupTab">Sign Up</button>
+        </div>
+        <div id="loginForm">
+            <input type="email" id="loginEmail" placeholder="College Email" required>
+            <input type="password" id="loginPassword" placeholder="Password" required>
+            <button id="loginBtn">Login</button>
+        </div>
+        <div id="signupForm" style="display:none;">
+            <input type="email" id="signupEmail" placeholder="College Email" required>
+            <input type="password" id="signupPassword" placeholder="Password" required>
+            <button id="signupBtn">Sign Up</button>
+        </div>
+    </div>
+</div>
+
 <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-    // Supabase credentials
     const SUPABASE_URL = "https://wzheisuwjdnjklpmzqtd.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aGVpc3V3amRuamtscG16cXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4MzQ1NTQsImV4cCI6MjA3MDQxMDU1NH0.uU04yFLt6EuPBagwc-qVDBZIiigk9HIDBJoIkEQ7oG0";
+    const SUPABASE_KEY = "YOUR_ANON_KEY";
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const bookForm = document.getElementById('bookForm');
     const bookList = document.getElementById('bookList');
 
-    // Theme toggle functionality
-    const themeSwitch = document.getElementById('themeSwitch');
-    themeSwitch.addEventListener('change', () => {
-        document.body.classList.toggle('light-mode', themeSwitch.checked);
-        localStorage.setItem('theme', themeSwitch.checked ? 'light' : 'dark');
-    });
+    // Modal handling
+    const authModal = document.getElementById('authModal');
+    const openLogin = document.getElementById('openLogin');
+    const closeModal = document.getElementById('closeModal');
+    const loginTab = document.getElementById('loginTab');
+    const signupTab = document.getElementById('signupTab');
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
 
-    // Load saved theme
-    if (localStorage.getItem('theme') === 'light') {
-        document.body.classList.add('light-mode');
-        themeSwitch.checked = true;
+    openLogin.onclick = () => authModal.style.display = 'flex';
+    closeModal.onclick = () => authModal.style.display = 'none';
+    window.onclick = e => { if(e.target == authModal) authModal.style.display = 'none'; };
+
+    loginTab.onclick = () => {
+        loginTab.classList.add('active');
+        signupTab.classList.remove('active');
+        loginForm.style.display = 'block';
+        signupForm.style.display = 'none';
+    }
+    signupTab.onclick = () => {
+        signupTab.classList.add('active');
+        loginTab.classList.remove('active');
+        signupForm.style.display = 'block';
+        loginForm.style.display = 'none';
     }
 
-    // Load books
+    // Auth
+    document.getElementById('signupBtn').onclick = async () => {
+        const email = document.getElementById('signupEmail').value.trim();
+        const password = document.getElementById('signupPassword').value;
+        if(!email.endsWith('@nitj.ac.in')) return alert('Only NITJ emails allowed');
+        const { error } = await supabase.auth.signUp({ email, password });
+        if(error) alert(error.message);
+        else alert('Check your email for verification link');
+    };
+
+    document.getElementById('loginBtn').onclick = async () => {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const { error, data } = await supabase.auth.signInWithPassword({ email, password });
+        if(error) alert(error.message);
+        else {
+            alert('Login successful');
+            authModal.style.display = 'none';
+            bookForm.style.display = 'block';
+        }
+    };
+
+    // Books loading
     async function loadBooks() {
         const { data, error } = await supabase
             .from('books')
             .select('*')
             .order('id', { ascending: false });
-
-        if (error) {
-            console.error(error);
-            return;
-        }
-
+        if (error) return console.error(error);
         bookList.innerHTML = "";
         data.forEach(book => {
             const bookItem = document.createElement('div');
@@ -217,17 +279,11 @@ a.whatsapp-btn {
         const { error } = await supabase.storage
             .from('book-images')
             .upload(fileName, file);
-
-        if (error) {
-            console.error("Image upload error:", error);
-            return null;
-        }
-
+        if (error) return null;
         const { data: publicData } = supabase
             .storage
             .from('book-images')
             .getPublicUrl(fileName);
-
         return publicData.publicUrl;
     }
 
@@ -236,12 +292,7 @@ a.whatsapp-btn {
         e.preventDefault();
         const file = document.getElementById('image').files[0];
         const imageUrl = await uploadImage(file);
-
-        if (!imageUrl) {
-            alert("Image upload failed");
-            return;
-        }
-
+        if (!imageUrl) return alert("Image upload failed");
         const newBook = {
             title: document.getElementById('title').value,
             price: parseFloat(document.getElementById('price').value),
@@ -249,11 +300,9 @@ a.whatsapp-btn {
             image_url: imageUrl,
             description: document.getElementById('description').value
         };
-
         const { error } = await supabase.from('books').insert([newBook]);
-        if (error) {
-            alert('Error adding book: ' + error.message);
-        } else {
+        if (error) alert('Error adding book: ' + error.message);
+        else {
             bookForm.reset();
             loadBooks();
         }
@@ -261,6 +310,5 @@ a.whatsapp-btn {
 
     loadBooks();
 </script>
-
 </body>
 </html>
