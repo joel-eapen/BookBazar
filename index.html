@@ -8,102 +8,209 @@
 :root {
     --bg-gradient: radial-gradient(circle at center, #1d2b64, #9b2063, #000000);
     --text-color: #fff;
+    --muted-text: rgba(255,255,255,0.8);
     --form-bg: rgba(40, 40, 40, 0.9);
     --input-bg: rgba(18, 18, 18, 0.9);
+    --surface: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.18);
     --button-bg: #9b2063;
     --button-hover: #1d2b64;
     --book-bg: rgba(40, 40, 40, 0.9);
     --disclaimer-bg: rgba(255, 77, 77, 0.9);
+    --shadow-lg: 0 20px 40px rgba(0,0,0,0.35);
 }
 
 /* Light mode variables */
 .light-mode {
     --bg-gradient: radial-gradient(circle at center, #f5f5f5, #dcdcdc, #ffffff);
     --text-color: #000;
+    --muted-text: rgba(0,0,0,0.7);
     --form-bg: rgba(255, 255, 255, 0.9);
     --input-bg: rgba(240, 240, 240, 0.9);
+    --surface: rgba(0,0,0,0.04);
+    --border: rgba(0,0,0,0.12);
     --button-bg: #1d2b64;
     --button-hover: #9b2063;
     --book-bg: rgba(255, 255, 255, 0.9);
     --disclaimer-bg: rgba(255, 200, 200, 0.9);
 }
 
+* { box-sizing: border-box; }
+html, body { height: 100%; }
 body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    margin: 0;
     background: var(--bg-gradient);
     background-size: cover;
     background-attachment: fixed;
     color: var(--text-color);
-    transition: all 0.3s ease;
+    transition: background 0.4s ease, color 0.2s ease;
 }
-h1 { text-align: center; color: var(--text-color); }
-form {
+
+.container {
+    width: min(1100px, 92vw);
+    margin: 0 auto;
+}
+
+/* Decorative background orbs */
+.bg-orb {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+}
+.bg-orb::before,
+.bg-orb::after {
+    content: "";
+    position: absolute;
+    filter: blur(60px);
+    opacity: 0.45;
+    transform: translateZ(0);
+}
+.bg-orb::before {
+    width: 60vmin; height: 60vmin; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #9b2063, transparent 60%);
+    top: -10vmin; left: -10vmin;
+}
+.bg-orb::after {
+    width: 70vmin; height: 70vmin; border-radius: 50%;
+    background: radial-gradient(circle at 70% 70%, #1d2b64, transparent 60%);
+    bottom: -20vmin; right: -10vmin;
+}
+
+/* Navbar */
+.navbar {
+    position: sticky;
+    top: 0;
+    backdrop-filter: blur(14px) saturate(140%);
+    background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+    border-bottom: 1px solid var(--border);
+    z-index: 50;
+}
+.navbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+}
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    font-size: 20px;
+}
+.brand .logo {
+    display: grid; place-items: center;
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, #9b2063, #1d2b64);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+}
+.nav-actions { display: flex; align-items: center; gap: 10px; }
+
+/* Buttons */
+.btn {
+    appearance: none; border: none; cursor: pointer;
+    padding: 10px 14px; border-radius: 10px; font-weight: 700;
+    color: #fff; background: var(--button-bg);
+    transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 8px 20px rgba(155,32,99,0.25);
+    text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+}
+.btn:hover { background: var(--button-hover); transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn.outline {
+    background: transparent; color: var(--text-color);
+    border: 1px solid var(--border);
+    box-shadow: none;
+}
+.btn.glass {
+    background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
+    color: var(--text-color);
+    border: 1px solid var(--border);
+}
+
+/* Hero */
+.hero { padding: 56px 0 32px; }
+.hero .content {
+    display: grid; gap: 18px;
+    text-align: center;
+}
+.hero h1 {
+    margin: 0; font-size: clamp(28px, 5vw, 44px);
+    line-height: 1.1;
+}
+.hero p { margin: 0; color: var(--muted-text); font-size: clamp(14px, 2.5vw, 18px); }
+.hero .ctas { display: flex; gap: 10px; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
+
+/* Feature cards */
+.features { margin: 32px 0 8px; }
+.feature-grid {
+    display: grid; gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+.card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: var(--shadow-lg);
+}
+.card h3 { margin: 0 0 6px; font-size: 16px; }
+.card p { margin: 0; color: var(--muted-text); font-size: 14px; }
+
+/* Disclaimer */
+.disclaimer {
+    background: var(--disclaimer-bg);
+    color: var(--text-color);
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin: 18px 0 8px;
+    font-size: 14px;
+    border: 1px solid var(--border);
+}
+
+/* Sell section */
+.section-title { margin: 24px 0 10px; font-size: 20px; }
+.form-card {
     background: var(--form-bg);
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: var(--shadow-lg);
 }
+
 input, textarea, button {
     width: 100%;
     padding: 10px;
     margin: 8px 0;
     border: none;
-    border-radius: 4px;
+    border-radius: 10px;
 }
 input, textarea {
     background: var(--input-bg);
     color: var(--text-color);
+    border: 1px solid var(--border);
 }
-button {
-    background: var(--button-bg);
-    color: white;
-    cursor: pointer;
-    font-weight: bold;
-}
-button:hover { background: var(--button-hover); }
-.book-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 15px;
-}
-.book {
-    background: var(--book-bg);
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-}
-img {
-    max-width: 100%;
-    border-radius: 5px;
-}
+textarea { resize: vertical; min-height: 100px; }
+
+/* Link styled as button */
 a.whatsapp-btn {
     display: inline-block;
     margin-top: 10px;
     background: var(--button-bg);
-    padding: 8px 12px;
-    border-radius: 4px;
+    padding: 10px 14px;
+    border-radius: 10px;
     color: white;
     text-decoration: none;
-    font-weight: bold;
+    font-weight: 800;
 }
-.disclaimer {
-    background: var(--disclaimer-bg);
-    color: var(--text-color);
-    padding: 10px 15px;
-    border-radius: 5px;
-    margin-bottom: 20px;
-    font-size: 14px;
-}
+a.whatsapp-btn:hover { background: var(--button-hover); }
 
-/* Toggle switch */
-.theme-toggle {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-}
-
-/* LOGIN MODAL */
+/* Modal (glassmorphic) */
 .modal {
     display: none;
     position: fixed;
@@ -116,184 +223,208 @@ a.whatsapp-btn {
     backdrop-filter: blur(14px) saturate(140%);
     justify-content: center;
     align-items: center;
+    padding: 16px;
 }
-
 .modal-content {
     position: relative;
     isolation: isolate;
     background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
     padding: 24px;
     border-radius: 20px;
-    width: min(92vw, 360px);
+    width: min(92vw, 380px);
     color: white;
-    border: 1px solid rgba(255,255,255,0.22);
-    box-shadow:
-        0 12px 30px rgba(0,0,0,0.45),
-        inset 0 1px 0 rgba(255,255,255,0.28),
-        inset 0 -1px 0 rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -1px 0 rgba(255,255,255,0.06);
     backdrop-filter: blur(20px) saturate(160%);
     overflow: hidden;
 }
-
-/* liquid reflections */
 .modal-content::before {
-    content: "";
-    position: absolute;
-    inset: -1px;
+    content: ""; position: absolute; inset: -1px;
     background:
         radial-gradient(60% 120% at -10% -20%, rgba(255,255,255,0.35), transparent 60%),
         radial-gradient(40% 100% at 120% -10%, rgba(255,255,255,0.12), transparent 50%);
-    mix-blend-mode: screen;
-    pointer-events: none;
+    mix-blend-mode: screen; pointer-events: none;
 }
-
-/* animated liquid blobs */
 .modal-content::after {
-    content: "";
-    position: absolute;
-    inset: -40%;
+    content: ""; position: absolute; inset: -40%;
     background:
         radial-gradient(35% 25% at 30% 20%, rgba(155, 32, 99, 0.35), transparent 60%),
         radial-gradient(25% 35% at 70% 70%, rgba(29, 43, 100, 0.35), transparent 60%);
-    filter: blur(40px);
-    z-index: -1;
-    animation: floatBlobs 12s ease-in-out infinite alternate;
+    filter: blur(40px); z-index: -1; animation: floatBlobs 12s ease-in-out infinite alternate;
 }
-
 @keyframes floatBlobs {
     0% { transform: translate(-2%, -2%) rotate(0deg) scale(1); }
     50% { transform: translate(2%, 1%) rotate(10deg) scale(1.05); }
     100% { transform: translate(-1%, 3%) rotate(-6deg) scale(1.02); }
 }
-
-/* Tabs with glass pills */
 .modal-tabs {
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.18);
-    padding: 6px;
-    border-radius: 999px;
-    margin-bottom: 16px;
+    display: flex; justify-content: space-between; gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 6px; border-radius: 999px; margin-bottom: 16px;
 }
 .modal-tabs button {
-    background: transparent;
-    border: none;
-    padding: 8px 14px;
-    color: rgba(255,255,255,0.85);
-    font-weight: 700;
-    cursor: pointer;
-    border-radius: 999px;
-    transition: all 0.2s ease;
+    background: transparent; border: none; padding: 8px 14px;
+    color: rgba(255,255,255,0.85); font-weight: 800; cursor: pointer;
+    border-radius: 999px; transition: all 0.2s ease;
 }
 .modal-tabs button.active {
     color: white;
     background: linear-gradient(135deg, rgba(155, 32, 99, 0.7), rgba(29, 43, 100, 0.7));
     box-shadow: 0 10px 24px rgba(155, 32, 99, 0.25);
-    border-bottom: none;
 }
-
-/* Close button as a glass chip */
 .close-btn {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    width: 32px;
-    height: 32px;
-    display: grid;
-    place-items: center;
-    font-size: 18px;
-    color: white;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.22);
-    border-radius: 999px;
-    cursor: pointer;
-    transition: transform 0.15s ease, background 0.2s ease;
+    position: absolute; top: 16px; right: 16px; width: 32px; height: 32px;
+    display: grid; place-items: center; font-size: 18px; color: white;
+    background: rgba(255,255,255,0.08); border: 1px solid var(--border);
+    border-radius: 999px; cursor: pointer; transition: transform 0.15s ease, background 0.2s ease;
 }
 .close-btn:hover { transform: scale(1.06); background: rgba(255,255,255,0.12); }
+.modal-content input { background: rgba(255,255,255,0.08); color: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+.modal-content input:focus { outline: none; border-color: rgba(155, 32, 99, 0.55); box-shadow: 0 0 0 3px rgba(155, 32, 99, 0.28); }
+.modal-content button { background: linear-gradient(135deg, #9b2063, #1d2b64); border-radius: 12px; border: 1px solid var(--border); color: #fff; font-weight: 800; }
+.modal-content button:hover { background: linear-gradient(135deg, #a72a6d, #223277); }
 
-/* Inputs & buttons inside modal with glass look */
-.modal-content input {
-    background: rgba(255,255,255,0.08);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.18);
-    border-radius: 10px;
-    padding: 10px 12px;
+/* Theme toggle switch */
+.theme-switch { position: relative; width: 46px; height: 28px; }
+.theme-switch input { display: none; }
+.theme-switch .slider {
+    position: absolute; inset: 0; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--surface);
 }
-.modal-content input:focus {
-    outline: none;
-    border-color: rgba(155, 32, 99, 0.55);
-    box-shadow: 0 0 0 3px rgba(155, 32, 99, 0.28);
+.theme-switch .slider::after {
+    content: ""; position: absolute; top: 2px; left: 2px; width: 22px; height: 22px;
+    border-radius: 50%; background: linear-gradient(135deg, #9b2063, #1d2b64);
+    transition: transform 0.2s ease;
 }
-.modal-content button {
-    background: linear-gradient(135deg, #9b2063, #1d2b64);
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.18);
-    color: #fff;
-    font-weight: 800;
-}
-.modal-content button:hover {
-    background: linear-gradient(135deg, #a72a6d, #223277);
-}
+.theme-switch input:checked + .slider::after { transform: translateX(18px); }
+
+/* Footer */
+.footer { margin: 32px 0 24px; color: var(--muted-text); font-size: 14px; }
+.footer .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.footer a { color: inherit; text-decoration: none; border-bottom: 1px dashed rgba(255,255,255,0.3); }
+
 </style>
 </head>
 <body>
+<div class="bg-orb"></div>
 
+<!-- Navbar -->
+<header class="navbar">
+  <div class="container navbar-inner">
+    <div class="brand">
+      <div class="logo">📚</div>
+      <span>Book Bazar</span>
+    </div>
+    <div class="nav-actions">
+      <a class="btn outline" href="books.html">Browse Books</a>
+      <button id="openLogin" class="btn">Login / Sign Up</button>
+      <label class="theme-switch" title="Toggle theme">
+        <input type="checkbox" id="themeToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+</header>
 
-<h1>📚 Book Bazar</h1>
+<!-- Hero -->
+<section class="hero">
+  <div class="container content">
+    <h1>Find. Sell. Save.</h1>
+    <p>A peer-to-peer marketplace for college books. Keep it simple, fast, and commission-free.</p>
+    <div class="ctas">
+      <a class="btn" href="books.html">View Available Books</a>
+      <a class="btn glass" href="#sell" id="sellCta">Sell a Book</a>
+    </div>
+  </div>
+</section>
 
-<button id="openLogin">Login / Sign Up</button>
+<!-- Feature highlights -->
+<section class="features">
+  <div class="container feature-grid">
+    <div class="card">
+      <h3>Zero Commission</h3>
+      <p>Deals and payments happen directly between seller and buyer via WhatsApp.</p>
+    </div>
+    <div class="card">
+      <h3>Fast & Local</h3>
+      <p>Connect with students around you and get books quickly.</p>
+    </div>
+    <div class="card">
+      <h3>Safe Conversations</h3>
+      <p>Chat on WhatsApp before you buy so there are no surprises.</p>
+    </div>
+  </div>
+</section>
 
-<form id="bookForm" style="display:none;">
-    <input type="text" id="title" placeholder="Book Title" required>
-    <input type="number" id="price" placeholder="Price" required>
-    <input type="tel" id="whatsapp" placeholder="WhatsApp Number (with country code)" required>
-    <input type="file" id="image" accept="image/*" required>
-    <textarea id="description" placeholder="Description" required></textarea>
-    <button type="submit">Add Book</button>
-</form>
-
-<div class="disclaimer">
+<div class="container">
+  <div class="disclaimer">
     ⚠️ We are not responsible for transactions. All deals and payments happen directly between seller & buyer via WhatsApp. No commissions are taken.
+  </div>
 </div>
 
-<div style="text-align:center; margin-bottom: 16px;">
-    <a class="whatsapp-btn" href="books.html">View Available Books</a>
-</div>
+<!-- Sell section -->
+<section id="sell" class="container">
+  <h2 class="section-title">Sell your book</h2>
+  <div class="form-card">
+    <form id="bookForm" style="display:none;">
+        <input type="text" id="title" placeholder="Book Title" required>
+        <input type="number" id="price" placeholder="Price" required>
+        <input type="tel" id="whatsapp" placeholder="WhatsApp Number (with country code)" required>
+        <input type="file" id="image" accept="image/*" required>
+        <textarea id="description" placeholder="Description" required></textarea>
+        <button type="submit" class="btn" style="width:100%">Add Book</button>
+    </form>
+    <div id="sellHint" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+      <p style="margin:0; color: var(--muted-text);">Ready to list a book? Click “Sell a Book” above to open the form.</p>
+      <button class="btn glass" id="openSellFromHint">Open form</button>
+    </div>
+  </div>
 
-<!-- Moved to books.html -->
+  <div style="text-align:center; margin: 16px 0 0;">
+      <a class="whatsapp-btn" href="books.html">View Available Books</a>
+  </div>
+</section>
 
 <!-- MODAL -->
 <div class="modal" id="authModal">
-    <div class="modal-content">
-        <span class="close-btn" id="closeModal">&times;</span>
-        <div class="modal-tabs">
-            <button id="loginTab" class="active">Login</button>
-            <button id="signupTab">Sign Up</button>
-        </div>
-        <div id="loginForm">
-            <input type="email" id="loginEmail" placeholder="College Email" required>
-            <input type="password" id="loginPassword" placeholder="Password" required>
-            <button id="loginBtn">Login</button>
-        </div>
-        <div id="signupForm" style="display:none;">
-            <input type="email" id="signupEmail" placeholder="College Email" required>
-            <input type="password" id="signupPassword" placeholder="Password" required>
-            <button id="signupBtn">Sign Up</button>
-        </div>
-    </div>
+  <div class="modal-content">
+      <span class="close-btn" id="closeModal">&times;</span>
+      <div class="modal-tabs">
+          <button id="loginTab" class="active">Login</button>
+          <button id="signupTab">Sign Up</button>
+      </div>
+      <div id="loginForm">
+          <input type="email" id="loginEmail" placeholder="College Email" required>
+          <input type="password" id="loginPassword" placeholder="Password" required>
+          <button id="loginBtn">Login</button>
+      </div>
+      <div id="signupForm" style="display:none;">
+          <input type="email" id="signupEmail" placeholder="College Email" required>
+          <input type="password" id="signupPassword" placeholder="Password" required>
+          <button id="signupBtn">Sign Up</button>
+      </div>
+  </div>
 </div>
+
+<footer class="footer">
+  <div class="container row">
+    <span>© <span id="year"></span> Book Bazar</span>
+    <span>
+      <a href="books.html">Books</a> ·
+      <a href="dashboard.html">Dashboard</a>
+    </span>
+  </div>
+</footer>
 
 <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
     const SUPABASE_URL = "https://wzheisuwjdnjklpmzqtd.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aGVpc3V3amRuamtscG16cXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4MzQ1NTQsImV4cCI6MjA3MDQxMDU1NH0.uU04yFLt6EuPBagwc-qVDBZIiigk9HIDBJoIkEQ7oG0";
-    const supabase = createClient("https://wzheisuwjdnjklpmzqtd.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aGVpc3V3amRuamtscG16cXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4MzQ1NTQsImV4cCI6MjA3MDQxMDU1NH0.uU04yFLt6EuPBagwc-qVDBZIiigk9HIDBJoIkEQ7oG0");
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const bookForm = document.getElementById('bookForm');
-    // book list moved to books.html
 
     // Modal handling
     const authModal = document.getElementById('authModal');
@@ -334,7 +465,7 @@ a.whatsapp-btn {
     document.getElementById('loginBtn').onclick = async () => {
         const email = document.getElementById('loginEmail').value.trim();
         const password = document.getElementById('loginPassword').value;
-        const { error, data } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
         if(error) alert(error.message);
         else {
             alert('Login successful');
@@ -342,9 +473,6 @@ a.whatsapp-btn {
             window.location.href = 'dashboard.html';
         }
     };
-
-    // Books loading
-    // books listing moved to books.html
 
     // Upload image
     async function uploadImage(file) {
@@ -377,11 +505,36 @@ a.whatsapp-btn {
         if (error) alert('Error adding book: ' + error.message);
         else {
             bookForm.reset();
-            // loadBooks moved to books.html
+            alert('Book added successfully');
         }
     });
 
-    // loadBooks moved to books.html
+    // Theme toggle and persistence
+    const themeToggle = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        themeToggle.checked = true;
+    }
+    themeToggle.addEventListener('change', () => {
+        document.body.classList.toggle('light-mode');
+        localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+    });
+
+    // Sell CTA reveals the form
+    const sellCta = document.getElementById('sellCta');
+    const openSellFromHint = document.getElementById('openSellFromHint');
+    function revealSellForm() {
+        document.getElementById('sell').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        bookForm.style.display = 'block';
+        const sellHint = document.getElementById('sellHint');
+        if (sellHint) sellHint.style.display = 'none';
+    }
+    sellCta.addEventListener('click', (e) => { e.preventDefault(); revealSellForm(); });
+    openSellFromHint.addEventListener('click', revealSellForm);
+
+    // Footer year
+    document.getElementById('year').textContent = new Date().getFullYear();
 </script>
 </body>
 </html>
