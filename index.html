@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Bazar</title>
+<style>
+:root {
+    --bg-gradient: radial-gradient(circle at center, #1d2b64, #9b2063, #000000);
+    --text-color: #fff;
+    --form-bg: rgba(40, 40, 40, 0.9);
+    --input-bg: rgba(18, 18, 18, 0.9);
+    --button-bg: #9b2063;
+    --button-hover: #1d2b64;
+    --book-bg: rgba(40, 40, 40, 0.9);
+    --disclaimer-bg: rgba(255, 77, 77, 0.9);
+}
+
+/* Light mode variables */
+.light-mode {
+    --bg-gradient: radial-gradient(circle at center, #f5f5f5, #dcdcdc, #ffffff);
+    --text-color: #000;
+    --form-bg: rgba(255, 255, 255, 0.9);
+    --input-bg: rgba(240, 240, 240, 0.9);
+    --button-bg: #1d2b64;
+    --button-hover: #9b2063;
+    --book-bg: rgba(255, 255, 255, 0.9);
+    --disclaimer-bg: rgba(255, 200, 200, 0.9);
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background: var(--bg-gradient);
+    background-size: cover;
+    background-attachment: fixed;
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+h1 { text-align: center; color: var(--text-color); }
+form {
+    background: var(--form-bg);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+input, textarea, button {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+}
+input, textarea {
+    background: var(--input-bg);
+    color: var(--text-color);
+}
+button {
+    background: var(--button-bg);
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+button:hover { background: var(--button-hover); }
+.book-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+}
+.book {
+    background: var(--book-bg);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+img {
+    max-width: 100%;
+    border-radius: 5px;
+}
+a.whatsapp-btn {
+    display: inline-block;
+    margin-top: 10px;
+    background: var(--button-bg);
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+.disclaimer {
+    background: var(--disclaimer-bg);
+    color: var(--text-color);
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+/* Toggle switch */
+.theme-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+}
+.theme-toggle input {
+    width: 40px;
+    height: 20px;
+    appearance: none;
+    background: #ccc;
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+    transition: background 0.3s;
+}
+.theme-toggle input:checked {
+    background: #4caf50;
+}
+.theme-toggle input::before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    transition: transform 0.3s;
+}
+.theme-toggle input:checked::before {
+    transform: translateX(20px);
+}
+</style>
+</head>
+<body>
+
+<div class="theme-toggle">
+    <label>
+        <input type="checkbox" id="themeSwitch">
+    </label>
+</div>
+
+<h1>📚 Book Bazar</h1>
+
+<form id="bookForm">
+    <input type="text" id="title" placeholder="Book Title" required>
+    <input type="number" id="price" placeholder="Price" required>
+    <input type="tel" id="whatsapp" placeholder="WhatsApp Number (with country code)" required>
+    <input type="file" id="image" accept="image/*" required>
+    <textarea id="description" placeholder="Description" required></textarea>
+    <button type="submit">Add Book</button>
+</form>
+
+<div class="disclaimer">
+    ⚠️ We are not responsible for transactions. All deals and payments happen directly between seller & buyer via WhatsApp. No commissions are taken.
+</div>
+
+<h2>Available Books</h2>
+<div class="book-list" id="bookList"></div>
+
+<script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    // Supabase credentials
+    const SUPABASE_URL = "https://wzheisuwjdnjklpmzqtd.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aGVpc3V3amRuamtscG16cXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4MzQ1NTQsImV4cCI6MjA3MDQxMDU1NH0.uU04yFLt6EuPBagwc-qVDBZIiigk9HIDBJoIkEQ7oG0";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const bookForm = document.getElementById('bookForm');
+    const bookList = document.getElementById('bookList');
+
+    // Theme toggle functionality
+    const themeSwitch = document.getElementById('themeSwitch');
+    themeSwitch.addEventListener('change', () => {
+        document.body.classList.toggle('light-mode', themeSwitch.checked);
+        localStorage.setItem('theme', themeSwitch.checked ? 'light' : 'dark');
+    });
+
+    // Load saved theme
+    if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-mode');
+        themeSwitch.checked = true;
+    }
+
+    // Load books
+    async function loadBooks() {
+        const { data, error } = await supabase
+            .from('books')
+            .select('*')
+            .order('id', { ascending: false });
+
+        if (error) {
+            console.error(error);
+            return;
+        }
+
+        bookList.innerHTML = "";
+        data.forEach(book => {
+            const bookItem = document.createElement('div');
+            bookItem.className = 'book';
+            bookItem.innerHTML = `
+                <img src="${book.image_url}" alt="${book.title}">
+                <h3>${book.title}</h3>
+                <p><strong>₹${book.price}</strong></p>
+                <p>${book.description}</p>
+                <a class="whatsapp-btn" href="https://wa.me/${book.whatsapp}" target="_blank">Chat on WhatsApp</a>
+            `;
+            bookList.appendChild(bookItem);
+        });
+    }
+
+    // Upload image
+    async function uploadImage(file) {
+        const fileName = `${Date.now()}-${file.name}`;
+        const { error } = await supabase.storage
+            .from('book-images')
+            .upload(fileName, file);
+
+        if (error) {
+            console.error("Image upload error:", error);
+            return null;
+        }
+
+        const { data: publicData } = supabase
+            .storage
+            .from('book-images')
+            .getPublicUrl(fileName);
+
+        return publicData.publicUrl;
+    }
+
+    // Add book
+    bookForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const file = document.getElementById('image').files[0];
+        const imageUrl = await uploadImage(file);
+
+        if (!imageUrl) {
+            alert("Image upload failed");
+            return;
+        }
+
+        const newBook = {
+            title: document.getElementById('title').value,
+            price: parseFloat(document.getElementById('price').value),
+            whatsapp: document.getElementById('whatsapp').value,
+            image_url: imageUrl,
+            description: document.getElementById('description').value
+        };
+
+        const { error } = await supabase.from('books').insert([newBook]);
+        if (error) {
+            alert('Error adding book: ' + error.message);
+        } else {
+            bookForm.reset();
+            loadBooks();
+        }
+    });
+
+    loadBooks();
+</script>
+
+</body>
+</html>
