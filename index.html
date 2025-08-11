@@ -109,43 +109,132 @@ a.whatsapp-btn {
     position: fixed;
     z-index: 1000;
     inset: 0;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(6px);
+    background:
+        radial-gradient(1200px 600px at 0% 0%, rgba(155, 32, 99, 0.25), transparent 60%),
+        radial-gradient(1000px 500px at 100% 100%, rgba(29, 43, 100, 0.25), transparent 60%),
+        rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(14px) saturate(140%);
     justify-content: center;
     align-items: center;
 }
+
 .modal-content {
-    background: rgba(30,30,30,0.85);
-    padding: 20px;
-    border-radius: 12px;
-    width: 320px;
+    position: relative;
+    isolation: isolate;
+    background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
+    padding: 24px;
+    border-radius: 20px;
+    width: min(92vw, 360px);
     color: white;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.22);
+    box-shadow:
+        0 12px 30px rgba(0,0,0,0.45),
+        inset 0 1px 0 rgba(255,255,255,0.28),
+        inset 0 -1px 0 rgba(255,255,255,0.06);
+    backdrop-filter: blur(20px) saturate(160%);
+    overflow: hidden;
 }
+
+/* liquid reflections */
+.modal-content::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    background:
+        radial-gradient(60% 120% at -10% -20%, rgba(255,255,255,0.35), transparent 60%),
+        radial-gradient(40% 100% at 120% -10%, rgba(255,255,255,0.12), transparent 50%);
+    mix-blend-mode: screen;
+    pointer-events: none;
+}
+
+/* animated liquid blobs */
+.modal-content::after {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    background:
+        radial-gradient(35% 25% at 30% 20%, rgba(155, 32, 99, 0.35), transparent 60%),
+        radial-gradient(25% 35% at 70% 70%, rgba(29, 43, 100, 0.35), transparent 60%);
+    filter: blur(40px);
+    z-index: -1;
+    animation: floatBlobs 12s ease-in-out infinite alternate;
+}
+
+@keyframes floatBlobs {
+    0% { transform: translate(-2%, -2%) rotate(0deg) scale(1); }
+    50% { transform: translate(2%, 1%) rotate(10deg) scale(1.05); }
+    100% { transform: translate(-1%, 3%) rotate(-6deg) scale(1.02); }
+}
+
+/* Tabs with glass pills */
 .modal-tabs {
     display: flex;
-    justify-content: space-around;
-    margin-bottom: 15px;
+    justify-content: space-between;
+    gap: 8px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.18);
+    padding: 6px;
+    border-radius: 999px;
+    margin-bottom: 16px;
 }
 .modal-tabs button {
-    background: none;
+    background: transparent;
     border: none;
-    padding: 8px;
-    color: #bbb;
-    font-weight: bold;
+    padding: 8px 14px;
+    color: rgba(255,255,255,0.85);
+    font-weight: 700;
     cursor: pointer;
+    border-radius: 999px;
+    transition: all 0.2s ease;
 }
 .modal-tabs button.active {
     color: white;
-    border-bottom: 2px solid var(--button-bg);
+    background: linear-gradient(135deg, rgba(155, 32, 99, 0.7), rgba(29, 43, 100, 0.7));
+    box-shadow: 0 10px 24px rgba(155, 32, 99, 0.25);
+    border-bottom: none;
 }
+
+/* Close button as a glass chip */
 .close-btn {
     position: absolute;
-    top: 20px;
-    right: 25px;
-    font-size: 22px;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    font-size: 18px;
     color: white;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 999px;
     cursor: pointer;
+    transition: transform 0.15s ease, background 0.2s ease;
+}
+.close-btn:hover { transform: scale(1.06); background: rgba(255,255,255,0.12); }
+
+/* Inputs & buttons inside modal with glass look */
+.modal-content input {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+.modal-content input:focus {
+    outline: none;
+    border-color: rgba(155, 32, 99, 0.55);
+    box-shadow: 0 0 0 3px rgba(155, 32, 99, 0.28);
+}
+.modal-content button {
+    background: linear-gradient(135deg, #9b2063, #1d2b64);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #fff;
+    font-weight: 800;
+}
+.modal-content button:hover {
+    background: linear-gradient(135deg, #a72a6d, #223277);
 }
 </style>
 </head>
@@ -197,8 +286,8 @@ a.whatsapp-btn {
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
     const SUPABASE_URL = "https://wzheisuwjdnjklpmzqtd.supabase.co";
-    const SUPABASE_KEY = "YOUR_ANON_KEY";
-    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aGVpc3V3amRuamtscG16cXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4MzQ1NTQsImV4cCI6MjA3MDQxMDU1NH0.uU04yFLt6EuPBagwc-qVDBZIiigk9HIDBJoIkEQ7oG0";
+    const supabase = createClient("https://wzheisuwjdnjklpmzqtd.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aGVpc3V3amRuamtscG16cXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4MzQ1NTQsImV4cCI6MjA3MDQxMDU1NH0.uU04yFLt6EuPBagwc-qVDBZIiigk9HIDBJoIkEQ7oG0");
 
     const bookForm = document.getElementById('bookForm');
     const bookList = document.getElementById('bookList');
@@ -233,7 +322,7 @@ a.whatsapp-btn {
     document.getElementById('signupBtn').onclick = async () => {
         const email = document.getElementById('signupEmail').value.trim();
         const password = document.getElementById('signupPassword').value;
-        if(!email.endsWith('@nitj.ac.in')) return alert('Only NITJ emails allowed');
+        if(!email.endsWith('@gmail.com')) return alert('Invalid Email');
         const { error } = await supabase.auth.signUp({ email, password });
         if(error) alert(error.message);
         else alert('Check your email for verification link');
