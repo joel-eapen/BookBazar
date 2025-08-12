@@ -395,14 +395,10 @@ a.whatsapp-btn:hover { background: var(--button-hover); }
           <button id="signupTab">Sign Up</button>
       </div>
       <div id="loginForm">
-          <input type="email" id="loginEmail" placeholder="College Email" required>
-          <input type="password" id="loginPassword" placeholder="Password" required>
-          <button id="loginBtn">Login</button>
+          <button id="googleLoginBtn">Continue with Google</button>
       </div>
       <div id="signupForm" style="display:none;">
-          <input type="email" id="signupEmail" placeholder="College Email" required>
-          <input type="password" id="signupPassword" placeholder="Password" required>
-          <button id="signupBtn">Sign Up</button>
+          <button id="googleSignupBtn">Continue with Google</button>
       </div>
   </div>
 </div>
@@ -452,27 +448,30 @@ a.whatsapp-btn:hover { background: var(--button-hover); }
         loginForm.style.display = 'none';
     }
 
-    // Auth
-    document.getElementById('signupBtn').onclick = async () => {
-        const email = document.getElementById('signupEmail').value.trim();
-        const password = document.getElementById('signupPassword').value;
-        if(!email.endsWith('@gmail.com')) return alert('Invalid Email');
-        const { error } = await supabase.auth.signUp({ email, password });
-        if(error) alert(error.message);
-        else alert('Check your email for verification link');
-    };
+    // Google OAuth
+    async function startGoogleOAuth() {
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: `${window.location.origin}/dashboard.html` }
+      });
+    }
+    document.getElementById('googleLoginBtn').onclick = startGoogleOAuth;
+    document.getElementById('googleSignupBtn').onclick = startGoogleOAuth;
 
-    document.getElementById('loginBtn').onclick = async () => {
-        const email = document.getElementById('loginEmail').value.trim();
-        const password = document.getElementById('loginPassword').value;
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if(error) alert(error.message);
-        else {
-            alert('Login successful');
-            authModal.style.display = 'none';
-            window.location.href = 'dashboard.html';
-        }
-    };
+    // Auto-open modal after 5 seconds if not authenticated; redirect if already logged in
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      setTimeout(() => {
+        // Only open if still not authenticated
+        supabase.auth.getSession().then(({ data: { session: again } }) => {
+          if (!again) authModal.style.display = 'flex';
+        });
+      }, 5000);
+    })();
 
     // Upload image
     async function uploadImage(file) {
